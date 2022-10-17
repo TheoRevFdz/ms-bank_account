@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,6 +60,18 @@ public class BankAccountController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "Error en servidor al actualizar la cuenta bancaria."));
+        }
+    }
+
+    @GetMapping(endPoint + "/byNroDoc/{nroDoc}")
+    public ResponseEntity<?> findAccountByNroDoc(@PathVariable String nroDoc) {
+        try {
+            final Mono<BankAccount> response = service.findAccountByNroDoc(nroDoc);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message",
+                            "Error en servidor al obetener la cuenta bancaria del cliente por número de documento."));
         }
     }
 }

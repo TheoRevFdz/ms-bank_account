@@ -11,4 +11,8 @@ public interface IBankAccountService {
     public Flux<BankAccount> findAllBankAccount();
 
     public Mono<BankAccount> updateBankAccount(BankAccount bankAccount);
+
+    public boolean deleteBankAccount(String id);
+
+    public Mono<BankAccount> findAccountByNroDoc(String nroDoc);
 }

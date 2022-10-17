@@ -22,6 +22,6 @@ public class BankAccount {
     private String typeAccount;
     private Double contableBalance;
     private String typeDoc;
-    private String numDoc;
+    private String nroDoc;
     private Date regDate;
 }

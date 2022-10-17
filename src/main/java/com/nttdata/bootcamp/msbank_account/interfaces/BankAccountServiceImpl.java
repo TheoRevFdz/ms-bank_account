@@ -33,4 +33,19 @@ public class BankAccountServiceImpl implements IBankAccountService {
                 .flatMap(repository::save);
     }
 
+    @Override
+    public boolean deleteBankAccount(String id) {
+        Mono<BankAccount> baExist = repository.findById(id);
+        if (baExist.block() != null) {
+            repository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Mono<BankAccount> findAccountByNroDoc(String nroDoc) {
+        return repository.findByNroDoc(nroDoc);
+    }
+
 }
