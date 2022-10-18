@@ -1,13 +1,17 @@
 package com.nttdata.bootcamp.msbank_account.clients;
 
-import java.util.Map;
-
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "ms-customers", url = "localhost:8081")
+import com.nttdata.bootcamp.msbank_account.config.FeignClientConfig;
+import com.nttdata.bootcamp.msbank_account.dto.CustomerDTO;
+
+@Primary
+@FeignClient(name = "ms-customers", url = "localhost:8081", configuration = FeignClientConfig.class)
 public interface ICustomerClientRest {
-    @GetMapping("customers/byNroDoc/{nroDoc}")
-    public Map<String,Object> findCustomerByNroDoc(@PathVariable String nroDoc);
+    @GetMapping(value = "customers/byNroDoc/{nroDoc}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public CustomerDTO findCustomerByNroDoc(@PathVariable String nroDoc);
 }

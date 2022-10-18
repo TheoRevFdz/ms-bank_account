@@ -3,6 +3,7 @@ package com.nttdata.bootcamp.msbank_account.interfaces;
 import java.time.Duration;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.nttdata.bootcamp.msbank_account.infraestructure.IBankAccountRepository;
@@ -14,6 +15,7 @@ import reactor.core.publisher.Mono;
 @Service
 public class BankAccountServiceImpl implements IBankAccountService {
     @Autowired
+    @Qualifier("IBankAccountRepository")
     private IBankAccountRepository repository;
 
     @Override

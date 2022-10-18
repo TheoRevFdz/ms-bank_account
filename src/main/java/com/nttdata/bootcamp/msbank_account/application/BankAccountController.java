@@ -3,6 +3,7 @@ package com.nttdata.bootcamp.msbank_account.application;
 import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nttdata.bootcamp.msbank_account.dto.CustomerDTO;
 import com.nttdata.bootcamp.msbank_account.interfaces.IBankAccountService;
+import com.nttdata.bootcamp.msbank_account.interfaces.ICustomerService;
 import com.nttdata.bootcamp.msbank_account.model.BankAccount;
 
 import feign.FeignException;
@@ -25,26 +28,26 @@ public class BankAccountController {
     @Autowired
     private IBankAccountService service;
 
-    // @Autowired
-    // private ICustomerService customerService;
+    @Autowired
+    @Qualifier("ICustomerService")
+    private ICustomerService customerService;
 
     final String endPoint = "bank_accounts";
 
     @PostMapping(endPoint)
     public ResponseEntity<?> createBankAccount(@RequestBody BankAccount bankAccount) {
         try {
-            // CustomerDTO verifCustomer =
-            // customerService.findCustomerByNroDoc(bankAccount.getNroDoc());
+            CustomerDTO verifCustomer = customerService.findCustomerByNroDoc(bankAccount.getNroDoc());
 
-            // if (verifCustomer != null) {
-            final Mono<BankAccount> baccountMono = Mono.just(bankAccount);
-            final Mono<BankAccount> response = service.createBankAccount(baccountMono);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-            // }
-            // return ResponseEntity.status(HttpStatus.NOT_FOUND)
-            // .body(Collections.singletonMap("message",
-            // "No se encontró cliente con número de documento: " +
-            // bankAccount.getNroDoc()));
+            if (verifCustomer != null) {
+                final Mono<BankAccount> baccountMono = Mono.just(bankAccount);
+                final Mono<BankAccount> response = service.createBankAccount(baccountMono);
+                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Collections.singletonMap("message",
+                            "No se encontró cliente con número de documento: " +
+                                    bankAccount.getNroDoc()));
         } catch (FeignException ex) {
             if (ex.status() == HttpStatus.NOT_FOUND.value()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
