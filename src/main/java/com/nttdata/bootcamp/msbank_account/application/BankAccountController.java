@@ -1,6 +1,7 @@
 package com.nttdata.bootcamp.msbank_account.application;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +14,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
 
 import com.nttdata.bootcamp.msbank_account.dto.CustomerDTO;
+import com.nttdata.bootcamp.msbank_account.enums.CustomerTypes;
+import com.nttdata.bootcamp.msbank_account.enums.TypesAccount;
 import com.nttdata.bootcamp.msbank_account.interfaces.IBankAccountService;
 import com.nttdata.bootcamp.msbank_account.interfaces.ICustomerService;
 import com.nttdata.bootcamp.msbank_account.model.BankAccount;
+import com.nttdata.bootcamp.msbank_account.util.ValidatorUtil;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,27 +38,42 @@ public class BankAccountController {
     @PostMapping
     public ResponseEntity<?> createBankAccount(@RequestBody BankAccount bankAccount) {
         try {
-            Optional<CustomerDTO> verifCustomer = customerService.findCustomerByNroDoc(bankAccount.getNroDoc());
+            Optional<CustomerDTO> existCustomer = customerService.findCustomerByNroDoc(bankAccount.getNroDoc());
 
-            if (verifCustomer.isPresent()) {
+            if (existCustomer.isPresent()) {
+                CustomerDTO dto = existCustomer.get();
                 final Mono<BankAccount> baccountMono = Mono.just(bankAccount);
-                final Mono<BankAccount> response = service.createBankAccount(baccountMono);
-                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+                if (dto.getTypePerson().equals(CustomerTypes.PERSONAL.toString())) {
+                    Flux<BankAccount> baFlux = service.findAccountByNroDoc(dto.getNroDoc());
+                    // List<BankAccount> accounts = baFlux.collectList().subscribe(b->b).;
+                    if (ValidatorUtil.validatePersonalAccount(baFlux.collectList().block())) {
+                        final Mono<BankAccount> response = service.createBankAccount(baccountMono);
+                        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+                    } else {
+                        return ResponseEntity.badRequest()
+                                .body("La cuenta personal solo puede tener un máximo de cuenta de "
+                                        + TypesAccount.AHORRO.toString() + ", una cuenta "
+                                        + TypesAccount.CORRIENTE.toString() + ", o cuentas a "
+                                        + TypesAccount.PLAZO_FIJO.toString());
+                    }
+                } else {
+
+                }
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Collections.singletonMap("message",
                             "No se encontró cliente con número de documento: " +
                                     bankAccount.getNroDoc()));
-        // } catch (FeignException ex) {
-        //     if (ex.status() == HttpStatus.NOT_FOUND.value()) {
-        //         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-        //                 .body(Collections.singletonMap("message",
-        //                         "No se encontró cliente con número de documento: " + bankAccount.getNroDoc()));
-        //     }
-        //     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-        //             .body(Collections.singletonMap("message", "Error al crear cuenta bancaria."));
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode().value() == HttpStatus.NOT_FOUND.value()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Collections.singletonMap("message",
+                                "No se encontró cliente con número de documento: " +
+                                        bankAccount.getNroDoc()));
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "Error al crear cuenta bancaria."));
         } catch (Exception e) {
-            // if(e.responseS)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "Error al crear cuenta bancaria."));
         }
@@ -88,7 +108,7 @@ public class BankAccountController {
     @GetMapping("/byNroDoc/{nroDoc}")
     public ResponseEntity<?> findAccountByNroDoc(@PathVariable String nroDoc) {
         try {
-            final Mono<BankAccount> response = service.findAccountByNroDoc(nroDoc);
+            final Flux<BankAccount> response = service.findAccountByNroDoc(nroDoc);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

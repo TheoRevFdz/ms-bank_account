@@ -46,7 +46,7 @@ public class BankAccountServiceImpl implements IBankAccountService {
     }
 
     @Override
-    public Mono<BankAccount> findAccountByNroDoc(String nroDoc) {
+    public Flux<BankAccount> findAccountByNroDoc(String nroDoc) {
         return repository.findByNroDoc(nroDoc);
     }
 
