@@ -1,14 +1,15 @@
 package com.nttdata.bootcamp.msbank_account.infraestructure;
 
-import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import java.util.List;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import com.nttdata.bootcamp.msbank_account.model.BankAccount;
 
-import reactor.core.publisher.Flux;
-
 @Repository("IBankAccountRepository")
-public interface IBankAccountRepository extends ReactiveMongoRepository<BankAccount, String> {
-    public Flux<BankAccount> findByNroDoc(String nroDoc);
-    // public Mono<Optional<BankAccount>> findBy
+public interface IBankAccountRepository extends MongoRepository<BankAccount, String> {
+    public List<BankAccount> findByNroDoc(String nroDoc);
+
+    public List<BankAccount> findByNroDocAndTypeAccount(String nroDoc, String typeAccount);
 }

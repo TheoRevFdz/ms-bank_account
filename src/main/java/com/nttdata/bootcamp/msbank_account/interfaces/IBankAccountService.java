@@ -1,5 +1,7 @@
 package com.nttdata.bootcamp.msbank_account.interfaces;
 
+import java.util.List;
+
 import com.nttdata.bootcamp.msbank_account.model.BankAccount;
 
 import reactor.core.publisher.Flux;
@@ -14,5 +16,7 @@ public interface IBankAccountService {
 
     public boolean deleteBankAccount(String id);
 
-    public Flux<BankAccount> findAccountByNroDoc(String nroDoc);
+    public List<BankAccount> findAccountByNroDoc(String nroDoc);
+
+    public List<BankAccount> findAccountByNroDocAndTypeAccount(String nroDoc, String typeAccount);
 }

@@ -1,8 +1,10 @@
 package com.nttdata.bootcamp.msbank_account.application;
 
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +20,6 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import com.nttdata.bootcamp.msbank_account.dto.CustomerDTO;
 import com.nttdata.bootcamp.msbank_account.enums.CustomerTypes;
-import com.nttdata.bootcamp.msbank_account.enums.TypesAccount;
 import com.nttdata.bootcamp.msbank_account.interfaces.IBankAccountService;
 import com.nttdata.bootcamp.msbank_account.interfaces.ICustomerService;
 import com.nttdata.bootcamp.msbank_account.model.BankAccount;
@@ -35,29 +36,34 @@ public class BankAccountController {
     @Autowired
     private ICustomerService customerService;
 
+    @Autowired
+    private ValidatorUtil validatorUtil;
+
     @PostMapping
     public ResponseEntity<?> createBankAccount(@RequestBody BankAccount bankAccount) {
         try {
             Optional<CustomerDTO> existCustomer = customerService.findCustomerByNroDoc(bankAccount.getNroDoc());
 
             if (existCustomer.isPresent()) {
+                String uniqNroAccount = String.format("%040d",
+                        new BigInteger(UUID.randomUUID().toString().replace("-", ""), 16));
                 CustomerDTO dto = existCustomer.get();
+                bankAccount.setNroAccount(uniqNroAccount);
                 final Mono<BankAccount> baccountMono = Mono.just(bankAccount);
-                if (dto.getTypePerson().equals(CustomerTypes.PERSONAL.toString())) {
-                    Flux<BankAccount> baFlux = service.findAccountByNroDoc(dto.getNroDoc());
-                    // List<BankAccount> accounts = baFlux.collectList().subscribe(b->b).;
-                    if (ValidatorUtil.validatePersonalAccount(baFlux.collectList().block())) {
-                        final Mono<BankAccount> response = service.createBankAccount(baccountMono);
-                        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-                    } else {
-                        return ResponseEntity.badRequest()
-                                .body("La cuenta personal solo puede tener un máximo de cuenta de "
-                                        + TypesAccount.AHORRO.toString() + ", una cuenta "
-                                        + TypesAccount.CORRIENTE.toString() + ", o cuentas a "
-                                        + TypesAccount.PLAZO_FIJO.toString());
-                    }
-                } else {
 
+                final Mono<BankAccount> response = service.createBankAccount(baccountMono);
+                if (dto.getTypePerson().equals(CustomerTypes.PERSONAL.toString())) {
+                    ResponseEntity<?> valid = validatorUtil.validatePersonalAccount(bankAccount);
+                    if (valid.getStatusCodeValue() == HttpStatus.OK.value()) {
+                        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+                    }
+                    return valid;
+                } else {
+                    ResponseEntity<?> valid = validatorUtil.validateEmpresarialAccount(bankAccount);
+                    if (valid.getStatusCodeValue() == HttpStatus.OK.value()) {
+                        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+                    }
+                    return valid;
                 }
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -108,8 +114,9 @@ public class BankAccountController {
     @GetMapping("/byNroDoc/{nroDoc}")
     public ResponseEntity<?> findAccountByNroDoc(@PathVariable String nroDoc) {
         try {
-            final Flux<BankAccount> response = service.findAccountByNroDoc(nroDoc);
-            return ResponseEntity.ok(response);
+            final List<BankAccount> response = service.findAccountByNroDoc(nroDoc);
+            Flux<BankAccount> result = Flux.fromIterable(response);
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message",
