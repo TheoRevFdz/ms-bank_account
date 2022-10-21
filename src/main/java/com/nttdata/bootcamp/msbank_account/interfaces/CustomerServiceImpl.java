@@ -20,7 +20,7 @@ public class CustomerServiceImpl implements ICustomerService {
     public Optional<CustomerDTO> findCustomerByNroDoc(String nroDoc) throws ParseException {
         Map<String, String> pathVar = new HashMap<String, String>();
         pathVar.put("nroDoc", nroDoc);
-        String uri="http://localhost:8090/api/customers/byNroDoc/{nroDoc}";
+        String uri = "http://localhost:8090/api/customers/byNroDoc/{nroDoc}";
         // String uri = "http://localhost:8081/byNroDoc/{nroDoc}";
         CustomerDTO dto = customerRest.getForObject(
                 uri,

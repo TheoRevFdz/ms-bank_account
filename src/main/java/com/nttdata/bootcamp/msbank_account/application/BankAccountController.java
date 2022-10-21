@@ -51,19 +51,12 @@ public class BankAccountController {
                 bankAccount.setNroAccount(uniqNroAccount);
                 final Mono<BankAccount> baccountMono = Mono.just(bankAccount);
 
-                final Mono<BankAccount> response = service.createBankAccount(baccountMono);
                 if (dto.getTypePerson().equals(CustomerTypes.PERSONAL.toString())) {
                     ResponseEntity<?> valid = validatorUtil.validatePersonalAccount(bankAccount);
-                    if (valid.getStatusCodeValue() == HttpStatus.OK.value()) {
-                        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-                    }
-                    return valid;
+                    return saveAccount(valid, baccountMono);
                 } else {
                     ResponseEntity<?> valid = validatorUtil.validateEmpresarialAccount(bankAccount);
-                    if (valid.getStatusCodeValue() == HttpStatus.OK.value()) {
-                        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-                    }
-                    return valid;
+                    return saveAccount(valid, baccountMono);
                 }
             }
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -83,6 +76,13 @@ public class BankAccountController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "Error al crear cuenta bancaria."));
         }
+    }
+
+    private ResponseEntity<?> saveAccount(ResponseEntity<?> valid, Mono<BankAccount> baccountMono) {
+        if (valid.getStatusCodeValue() == HttpStatus.OK.value()) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(service.createBankAccount(baccountMono));
+        }
+        return valid;
     }
 
     @GetMapping
