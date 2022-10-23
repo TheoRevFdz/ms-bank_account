@@ -1,4 +1,4 @@
-package com.nttdata.bootcamp.msbank_account.config;
+package com.nttdata.bootcamp.msaccounts.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;

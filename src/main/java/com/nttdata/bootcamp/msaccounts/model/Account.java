@@ -1,4 +1,4 @@
-package com.nttdata.bootcamp.msbank_account.model;
+package com.nttdata.bootcamp.msaccounts.model;
 
 import java.util.Date;
 
@@ -14,8 +14,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Document
-public class BankAccount {
+@Document("accounts")
+public class Account {
     @Id
     private String id;
     private String nroAccount;
@@ -24,4 +24,5 @@ public class BankAccount {
     private String typeDoc;
     private String nroDoc;
     private Date regDate;
+    private String nroInterbakaryAccount;
 }

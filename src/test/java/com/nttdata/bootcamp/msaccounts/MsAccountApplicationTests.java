@@ -1,10 +1,10 @@
-package com.nttdata.bootcamp.msbank_account;
+package com.nttdata.bootcamp.msaccounts;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class MsBankAccountApplicationTests {
+class MsAccountApplicationTests {
 
 	@Test
 	void contextLoads() {

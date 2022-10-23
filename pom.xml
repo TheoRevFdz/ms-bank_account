@@ -10,9 +10,9 @@
 		<!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.nttdata.bootcamp</groupId>
-	<artifactId>ms-bank_account</artifactId>
+	<artifactId>ms-accounts</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>ms-bank_account</name>
+	<name>ms-accounts</name>
 	<description>Microservice for bank accounts</description>
 	<properties>
 		<java.version>17</java.version>

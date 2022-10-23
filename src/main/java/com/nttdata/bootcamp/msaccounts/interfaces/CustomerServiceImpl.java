@@ -1,4 +1,4 @@
-package com.nttdata.bootcamp.msbank_account.interfaces;
+package com.nttdata.bootcamp.msaccounts.interfaces;
 
 import java.text.ParseException;
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.nttdata.bootcamp.msbank_account.dto.CustomerDTO;
+import com.nttdata.bootcamp.msaccounts.dto.CustomerDTO;
 
 @Service
 public class CustomerServiceImpl implements ICustomerService {

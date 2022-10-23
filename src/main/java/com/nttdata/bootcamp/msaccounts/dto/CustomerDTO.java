@@ -1,4 +1,4 @@
-package com.nttdata.bootcamp.msbank_account.dto;
+package com.nttdata.bootcamp.msaccounts.dto;
 
 import java.util.Date;
 

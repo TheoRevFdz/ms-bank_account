@@ -1,7 +1,7 @@
 version: '3.9'
 services: 
   mongodb:
-    container_name: ms-bank_account
+    container_name: db-accounts
     image: mongo
     hostname: host-bank
     restart: always
@@ -11,16 +11,16 @@ services:
       MONGO_INITDB_ROOT_USERNAME: hrevilla
       MONGO_INITDB_ROOT_PASSWORD: 1234
     volumes:
-      - data-mongodb:/var/lib/bank_accountdb
-      - logs-mongodb:/var/log/bank_accountdb/
+      - data-mongodb:/var/lib/accountsdb
+      - logs-mongodb:/var/log/accountsdb/
     networks:
       - bank
 
 volumes:
   data-mongodb:
-    name: bank_accountdb
+    name: accountsdb
   logs-mongodb:
-    name: bank_accountdb
+    name: accountsdb
 
 networks:
   bank:
